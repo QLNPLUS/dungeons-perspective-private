@@ -2,12 +2,6 @@ package com.cleannrooster.dungeons_iso.mixin;
 
 import com.cleannrooster.dungeons_iso.api.MinecraftClientAccessor;
 import com.cleannrooster.dungeons_iso.mod.Mod;
-import net.fabricmc.fabric.api.block.v1.FabricBlock;
-import net.fabricmc.fabric.api.block.v1.FabricBlockState;
-import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
-import net.fabricmc.fabric.impl.client.indigo.renderer.mesh.MutableQuadViewImpl;
-import net.fabricmc.fabric.impl.client.indigo.renderer.render.AbstractBlockRenderContext;
-import net.fabricmc.fabric.impl.client.indigo.renderer.render.BlockRenderInfo;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -32,8 +26,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(value = AbstractBlockRenderContext.class,priority = Integer.MIN_VALUE)
-public abstract class BlockMixin  {
+public final class BlockMixin  {
+  private BlockMixin() {
+  }
   /*  @Shadow
     protected  BlockRenderInfo blockInfo;
 

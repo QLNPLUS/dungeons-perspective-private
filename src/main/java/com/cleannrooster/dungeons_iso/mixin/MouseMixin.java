@@ -50,21 +50,23 @@ import java.util.function.Predicate;
 
 @Mixin(Mouse.class)
 public class MouseMixin implements MouseAccessor {
-    @Shadow
-    private boolean cursorLocked;
-    @Shadow
-    private boolean rightButtonClicked;
+    @Shadow(remap = false)
+    private boolean f_91520_;
+    @Shadow(remap = false)
+    private boolean f_91506_;
 
-    @Shadow
+    @Shadow(remap = false)
     @Final
+    private MinecraftClient f_91503_;
+    @Unique
     private MinecraftClient client;
     @SuppressWarnings("unused")
-    @Shadow
-    private boolean hasResolutionChanged;
-    @Shadow
-    private double x;
-    @Shadow
-    private double y;
+    @Shadow(remap = false)
+    private boolean f_91511_;
+    @Shadow(remap = false)
+    private double f_91507_;
+    @Shadow(remap = false)
+    private double f_91508_;
 
 
     private static int lockontime;
@@ -74,7 +76,12 @@ public class MouseMixin implements MouseAccessor {
     @Unique
     @Nullable
     private Double lastY;
-
+    @Unique
+    private boolean cameraDragActive;
+    @Unique
+    private double cameraDragLastX;
+    @Unique
+    private double cameraDragLastY;
 
     @Inject(
             method = "lockCursor",
@@ -82,23 +89,24 @@ public class MouseMixin implements MouseAccessor {
             cancellable = true
     )
     public void lockCursorXIV(CallbackInfo info) {
+        this.client = this.f_91503_;
 
         if (client.isWindowFocused()) {
-            if (!cursorLocked) {
+            if (!f_91520_) {
                 if (!MinecraftClient.IS_SYSTEM_MAC) {
                     KeyBinding.updatePressedStates();
                 }
 
-                cursorLocked = true;
+                f_91520_ = true;
 
                 if (Mod.enabled) {
                     // Merely hide the cursor instead of "disabling" it
-                    InputUtil.setCursorParameters(client.getWindow().getHandle(), GLFW.GLFW_CURSOR_NORMAL, x, y);
+                    InputUtil.setCursorParameters(client.getWindow().getHandle(), GLFW.GLFW_CURSOR_NORMAL, f_91507_, f_91508_);
                 } else {
-                    InputUtil.setCursorParameters(client.getWindow().getHandle(), GLFW.GLFW_CURSOR_DISABLED, x, y);
+                    InputUtil.setCursorParameters(client.getWindow().getHandle(), GLFW.GLFW_CURSOR_DISABLED, f_91507_, f_91508_);
 
-                    x = client.getWindow().getWidth() / 2.0;
-                    y = client.getWindow().getHeight() / 2.0;
+                    f_91507_ = client.getWindow().getWidth() / 2.0;
+                    f_91508_ = client.getWindow().getHeight() / 2.0;
                 }
 
                 client.setScreen(null);
@@ -106,7 +114,7 @@ public class MouseMixin implements MouseAccessor {
                 // This has protected access and i don't wanna AW it lmao hope this works
                 //client.attackCooldown = 10000;
 
-                hasResolutionChanged = true;
+                f_91511_ = true;
             }
         }
     }
@@ -122,13 +130,14 @@ public class MouseMixin implements MouseAccessor {
             cancellable = true
     )
     public void unlockCursorXIV(CallbackInfo info) {
-        if (cursorLocked) {
-            cursorLocked = false;
+        this.client = this.f_91503_;
+        if (f_91520_) {
+            f_91520_ = false;
             if (!Mod.enabled) {
-                x = client.getWindow().getWidth() / 2.0;
-                y = client.getWindow().getHeight() / 2.0;
+                f_91507_ = client.getWindow().getWidth() / 2.0;
+                f_91508_ = client.getWindow().getHeight() / 2.0;
             }
-            InputUtil.setCursorParameters(client.getWindow().getHandle(), GLFW.GLFW_CURSOR_NORMAL, x, y);
+            InputUtil.setCursorParameters(client.getWindow().getHandle(), GLFW.GLFW_CURSOR_NORMAL, f_91507_, f_91508_);
         }
     }
 
@@ -140,6 +149,7 @@ public class MouseMixin implements MouseAccessor {
     private void updateMouseAXIV(
             CallbackInfo ci, @Local(ordinal = 1) double i, @Local(ordinal = 2) double j, @Local int k
     ) {
+        this.client = this.f_91503_;
         GameRenderer renderer = client.gameRenderer;
         Window window = client.getWindow();
         Mouse mouse = client.mouse;
@@ -150,32 +160,34 @@ public class MouseMixin implements MouseAccessor {
         boolean spell = false;
 
         if (Mod.enabled && cameraEntity != null && client.player != null) {
-                if (client.options.pickItemKey.isPressed()||ClientInit.moveCameraBinding.isPressed()) {
-
-                    if (lastX == null || lastY == null) {
-                        InputUtil.setCursorParameters(client.getWindow().getHandle(), InputUtil.GLFW_CURSOR_DISABLED,
-                                x, y
-                        );
-                        lastX = x;
-                        lastY = y;
-                        Mod.lastyaw = Mod.yaw;
+                boolean cameraDragging = client.options.pickItemKey.isPressed() || ClientInit.moveCameraBinding.isPressed();
+                if (cameraDragging) {
+                    if (!cameraDragActive) {
+                        cameraDragActive = true;
+                        cameraDragLastX = f_91507_;
+                        cameraDragLastY = f_91508_;
                     }
-                    float yaw1 = (float) (Mod.lastyaw + (x - lastX) / (8.0D));
-                    float pitch1 = (float) (Mod.pitch + j * k / 8.0D);
-                    Mod.yaw = yaw1;
+
+                    // Keep the normal cursor mode and apply only the movement since the last event.
+                    double dragDeltaX = f_91507_ - cameraDragLastX;
+                    cameraDragLastX = f_91507_;
+                    cameraDragLastY = f_91508_;
+                    Mod.yaw += (float) (dragDeltaX / 8.0D);
                     Mod.pitch = 45;
-
-
                     Mod.crosshairTarget = null;
                 } else {
+                    if (cameraDragActive) {
+                        cameraDragActive = false;
+                    }
+
                     if(Mod.horizontalTarget != null){
                         if (lastX == null || lastY == null) {
 
-                            lastX = x;
-                            lastY = y;
+                            lastX = f_91507_;
+                            lastY = f_91508_;
                         }
                         if(lastY != null) {
-                            Mod.horizontalTarget = new BlockHitResult(Mod.lastVertical.getPos().add(0, ((-(y - lastY) * k) / 40), 0), Mod.lastVertical.getSide(), BlockPos.ofFloored(Mod.lastVertical.getPos().add(0, ((-(y - lastY) * k) / 40), 0)), true);
+                            Mod.horizontalTarget = new BlockHitResult(Mod.lastVertical.getPos().add(0, ((-(f_91508_ - lastY) * k) / 40), 0), Mod.lastVertical.getSide(), BlockPos.ofFloored(Mod.lastVertical.getPos().add(0, ((-(f_91508_ - lastY) * k) / 40), 0)), true);
 
                         }
 
@@ -185,11 +197,11 @@ public class MouseMixin implements MouseAccessor {
                         InputUtil.setCursorParameters(
                                 client.getWindow().getHandle(),
                                 GLFW.GLFW_CURSOR_NORMAL,
-                                lastX != null ? lastX : x,
-                                lastY != null ? lastY : y
+                                lastX != null ? lastX : f_91507_,
+                                lastY != null ? lastY : f_91508_
                         );
-                        x = lastX;
-                        y = lastY;
+                        f_91507_ = lastX;
+                        f_91508_ = lastY;
                         lastX = null;
                         lastY = null;
                     }
@@ -484,7 +496,7 @@ public class MouseMixin implements MouseAccessor {
             if (Mod.enabled && Config.GSON.instance().scrollWheelZoom ) {
 
 
-                Mod.zoom = (MathHelper.clamp(Mod.zoom - (float) scrollAmount * 0.2f,0.5F/MathHelper.clamp(Config.GSON.instance().zoomFactor,1F,1.5F),5.0F));
+                Mod.adjustZoom(-(float) scrollAmount * 0.2F, 5.0F);
 
             } else {
 
@@ -498,6 +510,6 @@ public class MouseMixin implements MouseAccessor {
 
     @Override
     public void setRightClick(boolean bool) {
-        rightButtonClicked = bool;
+        f_91506_ = bool;
     }
 }

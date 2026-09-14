@@ -13,7 +13,6 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -21,10 +20,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(AbstractHorseEntity.class)
 public abstract class AbstractHorseEntityMixin {
-
-    @Shadow
-    protected abstract Vec2f getControlledRotation(LivingEntity controllingPassenger);
-
 
     private static Vec3d movementInputToVelocityCleann(Vec3d movementInput, float speed, float yaw) {
         double d = movementInput.lengthSquared();
@@ -38,7 +33,8 @@ public abstract class AbstractHorseEntityMixin {
         }
     }
     @Inject(
-            method = "getControlledMovementInput",
+            method = "m_274312_",
+            remap = false,
             at = @At(value = "RETURN"),
             cancellable = true
     )
@@ -55,7 +51,8 @@ public abstract class AbstractHorseEntityMixin {
         }
     }
     @Inject(
-            method = "getControlledRotation",
+            method = "m_274391_",
+            remap = false,
             at = @At(value = "RETURN"),
             cancellable = true
     )

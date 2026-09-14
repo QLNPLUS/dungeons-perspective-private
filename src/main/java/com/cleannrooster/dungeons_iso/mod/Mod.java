@@ -35,6 +35,27 @@ public class Mod {
     }
 
     public static float zoom = 5.0F;
+    public static float zoomTarget = zoom;
+
+    private static final float ZOOM_SMOOTHING = 0.22F;
+
+    public static float minimumZoom() {
+        return 0.5F / MathHelper.clamp(Config.GSON.instance().zoomFactor, 1F, 1.5F);
+    }
+
+    public static void adjustZoom(float amount, float maximum) {
+        zoomTarget = MathHelper.clamp(zoomTarget + amount, minimumZoom(), maximum);
+    }
+
+    public static void updateZoom() {
+        float difference = zoomTarget - zoom;
+        if (Math.abs(difference) < 0.001F) {
+            zoom = zoomTarget;
+        } else {
+            zoom += difference * ZOOM_SMOOTHING;
+        }
+    }
+
     public static boolean enabled = false;
     public static Perspective lastPerspective;
     public static HitResult crosshairTarget;

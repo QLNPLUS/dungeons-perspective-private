@@ -1,28 +1,16 @@
-package com.cleannrooster.dungeons_iso.config;
+/* package com.cleannrooster.dungeons_iso.config;
 
-import com.terraformersmc.modmenu.api.ConfigScreenFactory;
-import com.terraformersmc.modmenu.api.ModMenuApi;
 import dev.isxander.yacl3.api.*;
 import dev.isxander.yacl3.api.controller.BooleanControllerBuilder;
 import dev.isxander.yacl3.api.controller.FloatFieldControllerBuilder;
 import dev.isxander.yacl3.gui.YACLScreen;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.text.MutableText;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import com.cleannrooster.dungeons_iso.ClientInit;
 
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
-
-public class Gui implements ModMenuApi {
+public final class Gui {
 
 
-    @Override
-    public ConfigScreenFactory<?> getModConfigScreenFactory() {
-        return (parent) -> {
-            AtomicReference<Option<Boolean>> targetFromCameraOption = new AtomicReference<>();
-            AtomicReference<Option<Boolean>> unlimitedReachOption = new AtomicReference<>();
+    public static Screen createConfigScreen(Screen parent) {
 
             YACLScreen screen = (YACLScreen) YetAnotherConfigLib.create(
                     Config.GSON,
@@ -197,6 +185,18 @@ public class Gui implements ModMenuApi {
 
 
             return screen;
-        };
+    }
+} */
+
+package com.cleannrooster.dungeons_iso.config;
+
+import net.minecraft.client.gui.screen.Screen;
+
+public final class Gui {
+    private Gui() {
+    }
+
+    public static Screen createConfigScreen(Screen parent) {
+        return parent;
     }
 }

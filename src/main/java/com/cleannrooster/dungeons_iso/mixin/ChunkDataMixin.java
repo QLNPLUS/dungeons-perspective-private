@@ -15,11 +15,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ChunkBuilder.BuiltChunk.class)
 public class ChunkDataMixin  implements BuiltChunkAccessor {
-    @Shadow
-    private boolean needsImportantRebuild;
+    @Shadow(remap = false)
+    private boolean f_112795_;
 
     public void setNeedsImportantRebuild(boolean needsImportantRebuild) {
-        this.needsImportantRebuild = needsImportantRebuild;
+        this.f_112795_ = needsImportantRebuild;
     }
 
 

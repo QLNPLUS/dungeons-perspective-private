@@ -4,7 +4,6 @@ import com.cleannrooster.dungeons_iso.ClientInit;
 import com.cleannrooster.dungeons_iso.api.MouseAccessor;
 import com.cleannrooster.dungeons_iso.config.Config;
 import com.cleannrooster.dungeons_iso.mod.Mod;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.DoorBlock;
 import net.minecraft.block.WallMountedBlock;
 import net.minecraft.client.MinecraftClient;

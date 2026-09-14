@@ -39,12 +39,12 @@ public abstract class WorldRendererMixin implements WorldRendererAccessor {
 
         @Override
     public BlockingQueue<ChunkBuilder.BuiltChunk> chunks() {
-        return builtChunks;
+        return f_194306_;
     }
 
 
-    @Shadow
-    private BlockingQueue<ChunkBuilder.BuiltChunk> builtChunks;
+    @Shadow(remap = false)
+    private BlockingQueue<ChunkBuilder.BuiltChunk> f_194306_;
 
 
  /*   @Inject(method = "getEntitiesToRender", at = @At("TAIL"))

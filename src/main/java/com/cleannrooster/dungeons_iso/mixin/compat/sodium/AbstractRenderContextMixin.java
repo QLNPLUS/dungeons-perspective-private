@@ -21,6 +21,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.RaycastContext;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -30,8 +31,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(AbstractBlockRenderContext.class)
+@Pseudo
 public abstract class AbstractRenderContextMixin implements BlockCullerUser {
-    @Shadow
+    @Shadow(remap = false)
     protected  BlockRenderInfo blockInfo ;
 
 

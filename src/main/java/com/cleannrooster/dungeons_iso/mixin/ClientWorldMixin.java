@@ -1,7 +1,6 @@
 package com.cleannrooster.dungeons_iso.mixin;
 
 import com.cleannrooster.dungeons_iso.mod.Mod;
-import net.fabricmc.fabric.impl.client.indigo.renderer.render.BlockRenderInfo;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;

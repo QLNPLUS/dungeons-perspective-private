@@ -2,23 +2,17 @@ package com.cleannrooster.dungeons_iso;
 
 
 import com.cleannrooster.dungeons_iso.config.Config;
-import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
-import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
-import java.util.function.Consumer;
-
-@Environment(EnvType.CLIENT)
-public class ClientInit implements ClientModInitializer {
+public final class ClientInit {
+    private static final Logger LOGGER = LogManager.getLogger("Dungeons Perspective");
+    private static boolean initialized;
     public static ClientInit instance;
     public static KeyBinding toggleBinding;
     public static KeyBinding isoBinding;
@@ -34,6 +28,10 @@ public class ClientInit implements ClientModInitializer {
     public static KeyBinding interact;
     public static KeyBinding verticalBinding;
 
+    public static boolean isInitialized() {
+        return initialized;
+    }
+
 
     public static boolean isConnectedToServer() {
         ClientPlayNetworkHandler clientPlayNetworkHandler = MinecraftClient.getInstance().getNetworkHandler();
@@ -42,79 +40,93 @@ public class ClientInit implements ClientModInitializer {
 
 
 
-    @Override
-    public void onInitializeClient() {
-        instance = this;
+    public static void initialize() {
+        if (initialized) {
+            return;
+        }
+        initialized = true;
+        instance = new ClientInit();
         Config.GSON.load();
 
-        KeyBindingHelper.registerKeyBinding(toggleBinding = new KeyBinding(
+        toggleBinding = new KeyBinding(
                 "dungeons_iso.binds.toggle",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_F4,
                 "dungeons_iso.binds.category"
-        ));
-        KeyBindingHelper.registerKeyBinding(isoBinding = new KeyBinding(
+        );
+        isoBinding = new KeyBinding(
                 "dungeons_iso.binds.iso",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_HOME,
                 "dungeons_iso.binds.category"
-        ));
-        KeyBindingHelper.registerKeyBinding(moveCameraBinding = new KeyBinding(
+        );
+        moveCameraBinding = new KeyBinding(
                 "dungeons_iso.binds.moveCamera",
-                InputUtil.Type.KEYSYM,
+                InputUtil.Type.MOUSE,
                 GLFW.GLFW_MOUSE_BUTTON_3,
                 "dungeons_iso.binds.category"
-        ));
+        );
 
-        KeyBindingHelper.registerKeyBinding(lockOn = new KeyBinding(
+        lockOn = new KeyBinding(
                 "dungeons_iso.binds.lockOn",
-                InputUtil.Type.MOUSE,
+                InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_H,
                 "dungeons_iso.binds.category"
-        ));
+        );
 
-        KeyBindingHelper.registerKeyBinding(clickToMove = new KeyBinding(
+        clickToMove = new KeyBinding(
                 "dungeons_iso.binds.clickToMove",
                 InputUtil.Type.MOUSE,
                 InputUtil.UNKNOWN_KEY.getCode(),
                 "dungeons_iso.binds.category"
-        ));
-        KeyBindingHelper.registerKeyBinding(zoomInBinding = new KeyBinding(
+        );
+        zoomInBinding = new KeyBinding(
                 "dungeons_iso.binds.zoomIn",
-                InputUtil.Type.MOUSE,
+                InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_UP,
                 "dungeons_iso.binds.category"
-        ));
-        KeyBindingHelper.registerKeyBinding(zoomOutBinding = new KeyBinding(
+        );
+        zoomOutBinding = new KeyBinding(
                 "dungeons_iso.binds.zoomOut",
-                InputUtil.Type.MOUSE,
+                InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_DOWN,
                 "dungeons_iso.binds.category"
-        ));
-        KeyBindingHelper.registerKeyBinding(verticalBinding = new KeyBinding(
+        );
+        verticalBinding = new KeyBinding(
                 "dungeons_iso.binds.verticalBinding",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_RIGHT_ALT,
                 "dungeons_iso.binds.category"
-        ));
-        KeyBindingHelper.registerKeyBinding(rotateClockwase = new KeyBinding(
+        );
+        rotateClockwase = new KeyBinding(
                 "dungeons_iso.binds.rotateClockwise",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_RIGHT,
                 "dungeons_iso.binds.category"
-        ));
-        KeyBindingHelper.registerKeyBinding(interact = new KeyBinding(
+        );
+        interact = new KeyBinding(
                 "dungeons_iso.binds.interact",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_G,
                 "dungeons_iso.binds.category"
-        ));
-        KeyBindingHelper.registerKeyBinding(rotateCounterClockwise = new KeyBinding(
+        );
+        rotateCounterClockwise = new KeyBinding(
                 "dungeons_iso.binds.rotateCounterClockwise",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_LEFT,
                 "dungeons_iso.binds.category"
-        ));
+        );
+
+        cycleTargetBinding = new KeyBinding(
+                "dungeons_iso.binds.cycleTarget",
+                InputUtil.Type.KEYSYM,
+                InputUtil.UNKNOWN_KEY.getCode(),
+                "dungeons_iso.binds.category"
+        );
+
+        Config.GSON.save();
+        LOGGER.info("Client controls initialized; startup={}, clickToMove={}",
+                Config.GSON.instance().onStartup, Config.GSON.instance().clickToMove);
 
 
         // Client side stuff

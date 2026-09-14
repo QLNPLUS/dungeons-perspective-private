@@ -1,7 +1,6 @@
 plugins {
-    id 'fabric-loom' version '1.10-SNAPSHOT'
+    id 'dev.architectury.loom' version '1.3-SNAPSHOT'
     id 'maven-publish'
-    id "com.modrinth.minotaur" version "2.+"
 }
 
 version = project.mod_version
@@ -12,8 +11,12 @@ base {
 }
 loom {
     accessWidenerPath = file("src/main/resources/dungeons_iso.accesswidener")
+    forge {
+        mixinConfigs = ["dungeons_iso.mixins.json"]
+    }
 }
 repositories {
+    mavenCentral()
     // Add repositories to retrieve artifacts from in here.
     // You should only use this when depending on other mods because
     // Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
@@ -21,7 +24,6 @@ repositories {
     // for more information about repositories.
     maven { url 'https://maven.shedaniel.me/' }
     maven { url "https://maven.isxander.dev/releases" }
-    maven { url "https://maven.terraformersmc.com/" }
     maven {
         name = 'Modrinth'
         url = 'https://api.modrinth.com/maven'
@@ -31,43 +33,44 @@ repositories {
     }
 
     maven {
-        name = "Ladysnake Libs"
-        url = 'https://maven.ladysnake.org/releases'
+        name = 'Sinytra'
+        url = 'https://maven.su5ed.dev/releases'
     }
-    maven { url 'https://maven.kosmx.dev/' }
-    maven{ url"https://maven.bawnorton.com/releases"}
 }
 
 dependencies {
-    // To change the versions see the gradle.properties file
     minecraft "com.mojang:minecraft:${minecraft_version}"
     mappings "net.fabricmc:yarn:${yarn_mappings}:v2"
-    modImplementation("maven.modrinth:spell-engine:${project.spell_engine_version}")
-    include(implementation("com.github.ZsoltMolnarrr:TinyConfig:${project.tiny_config_version}"))
-    modImplementation "maven.modrinth:combat-roll:1.3.3+1.20.1-fabric"
-    modImplementation "net.fabricmc:fabric-loader:${loader_version}"
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
-    modImplementation "dev.isxander:yet-another-config-lib:${project.yacl_version}"
-    modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
-    modImplementation("dev.kosmx.player-anim:player-animation-lib-fabric:${project.player_anim_version}")
-    modImplementation("maven.modrinth:spell-power:${project.spell_power_version}")
-    modImplementation("dev.emi:trinkets:${project.trinkets_version}")
-    modImplementation("com.github.bawnorton.mixinsquared:mixinsquared-fabric:0.2.0")
-    include("com.github.bawnorton.mixinsquared:mixinsquared-fabric:0.2.0")
-    annotationProcessor(("com.github.bawnorton.mixinsquared:mixinsquared-fabric:0.2.0"))
-    modApi(modApi "me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}") {
-        exclude(group: "net.fabricmc.fabric-api")
+    forge "net.minecraftforge:forge:${forge_version}"
+
+    // Forgified Fabric API provides the Fabric renderer and networking APIs on Forge.
+    def ffapiJar = project.findProperty('ffapi_jar')?.toString()
+    def ffapiLibsDir = project.findProperty('ffapi_libs_dir')?.toString()
+    if (ffapiLibsDir && file(ffapiLibsDir).exists()) {
+        modCompileOnly files(fileTree(dir: ffapiLibsDir, includes: ['*.jar']))
+    } else if (ffapiJar && file(ffapiJar).exists()) {
+        modCompileOnly files(ffapiJar)
+    } else {
+        modImplementation "dev.su5ed.sinytra.fabric-api:fabric-api:${ffapi_version}"
+        modCompileOnly "io.github.llamalad7:mixinextras-common:0.4.1"
     }
-    modImplementation "maven.modrinth:sodium:${rootProject.sodium_version}-fabric"
+
+    // Development-only renderer target. The final mod does not package Embeddium.
+    def embeddiumJar = file(project.findProperty('embeddium_jar') ?: 'D:/Minecraft/versions/Last One/mods/[C][优化]embeddium-0.3.31+mc1.20.1.jar')
+    if (embeddiumJar.exists()) {
+        modCompileOnly files(embeddiumJar)
+        modRuntimeOnly files(embeddiumJar)
+    }
 }
 
 processResources {
     inputs.property "version", project.version
     filteringCharset "UTF-8"
 
-    filesMatching("fabric.mod.json") {
-        expand "version": project.version
+    filesMatching("META-INF/mods.toml") {
+        expand version: project.version, forge_version: forge_version
     }
+    exclude 'fabric.mod.json'
 }
 
 def targetJavaVersion = 17
@@ -94,29 +97,24 @@ java {
 }
 
 jar {
+    from("${buildDir}/classes/java/main")
+    from("${buildDir}/resources/main")
+    manifest {
+        attributes("MixinConfigs": "dungeons_iso.mixins.json")
+    }
     from("LICENSE") {
         rename { "${it}_${project.base.archivesName.get()}" }
     }
 }
 
-modrinth {
-    token = System.getenv("MODRINTH_TOKEN")
-    // Remember to have the MODRINTH_TOKEN environment variable set or else this will fail - just make sure it stays private!
-    projectId = "minecraft-xiv" // This can be the project ID or the slug. Either will work!
-    versionType = "release" // This is the default -- can also be `beta` or `alpha`
-    uploadFile = remapJar // With Loom, this MUST be set to `remapJar` instead of `jar`!
-    gameVersions = [project.minecraft_version] // Must be an array, even with only one version
-    loaders = ["fabric"] // Must also be an array - no need to specify this if you're using Loom or ForgeGradle
-    dependencies { // A special DSL for creating dependencies
-        // scope.type
-        // The scope can be `required`, `optional`, `incompatible`, or `embedded`
-        // The type can either be `project` or `version`
-        required.project "fabric-api" // Creates a new required dependency on Fabric API
-        required.version "yacl", project.yacl_version
-        optional.version "modmenu", project.modmenu_version
-        // Creates a new optional dependency on this specific version of Sodium
-    }
-    syncBodyFrom = rootProject.file("README.md").text
+tasks.named("remapJar") {
+    // Loom 1.3 inherits an extra Jar copy action that overwrites the remapped output on Gradle 8.12.
+    actions.remove(actions.get(1))
+}
+
+tasks.named("remapSourcesJar") {
+    // Apply the same workaround to the remapped sources archive.
+    actions.remove(actions.get(1))
 }
 
 // configure the maven publication

@@ -1,0 +1,33 @@
+modLoader = "javafml"
+loaderVersion = "[47,)"
+license = "MIT"
+
+[[mods]]
+modId = "dungeons_iso"
+version = "1.7.1"
+displayName = "Dungeons Perspective"
+authors = "cleannrooster/Forg"
+description = '''
+Changes Minecraft's perspective to be more like Minecraft Dungeons.
+'''
+
+[[dependencies.dungeons_iso]]
+modId = "forge"
+mandatory = true
+versionRange = "[47.2,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.dungeons_iso]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.20.1,1.20.2)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.dungeons_iso]]
+modId = "fabric_api"
+mandatory = true
+versionRange = "[0.92.6,)"
+ordering = "AFTER"
+side = "BOTH"

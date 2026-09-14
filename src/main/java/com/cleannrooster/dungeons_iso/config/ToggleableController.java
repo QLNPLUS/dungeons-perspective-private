@@ -1,4 +1,4 @@
-package com.cleannrooster.dungeons_iso.config;
+/* package com.cleannrooster.dungeons_iso.config;
 
 import dev.isxander.yacl3.api.Binding;
 import dev.isxander.yacl3.api.Controller;
@@ -66,9 +66,9 @@ public class ToggleableController<T> implements Controller<T> {
         private final ToggleableController<T> control;
         private final TickBoxController.TickBoxControllerElement tickBox;
         private final AbstractWidget inner;
-/*
+//
         private final TooltipState tooltip = new TooltipState();
-*/
+//
 
         public ToggleableControllerWidget(ToggleableController<T> control, YACLScreen screen, Dimension<Integer> dim) {
             super(dim);
@@ -84,12 +84,12 @@ public class ToggleableController<T> implements Controller<T> {
         public void render(DrawContext graphics, int mouseX, int mouseY, float delta) {
             this.tickBox.render(graphics, mouseX, mouseY, delta);
             this.inner.render(graphics, mouseX, mouseY, delta);
-    /*        this.tooltip.setTooltip(Tooltip.of(this.control.tickBoxTooltipFunction.get()));
+    //        this.tooltip.setTooltip(Tooltip.of(this.control.tickBoxTooltipFunction.get()));
             this.tooltip.render(
                     this.tickBox.isMouseOver(mouseX, mouseY),
                     this.tickBox.isFocused(),
                     this.tickBox.getNavigationFocus()
-            );*/
+            );//
         }
 
         @Override
@@ -161,5 +161,12 @@ public class ToggleableController<T> implements Controller<T> {
             this.inner.appendNarrations(builder);
         }
 
+    }
+} */
+
+package com.cleannrooster.dungeons_iso.config;
+
+public final class ToggleableController<T> {
+    private ToggleableController() {
     }
 }

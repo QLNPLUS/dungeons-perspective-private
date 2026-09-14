@@ -4,8 +4,6 @@ import com.cleannrooster.dungeons_iso.api.BlockCuller;
 import com.cleannrooster.dungeons_iso.api.MinecraftClientAccessor;
 import com.cleannrooster.dungeons_iso.compat.SodiumCompat;
 import com.cleannrooster.dungeons_iso.mod.Mod;
-import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.annotation.Nullable;
-import net.fabricmc.fabric.api.block.v1.FabricBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;

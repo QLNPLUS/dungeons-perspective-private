@@ -23,11 +23,11 @@ import java.util.UUID;
 
 @Mixin(BossBarHud.class)
 public abstract class BossBarHudMixin implements ClientBossBarAccessor {
-    @Shadow
-     Map<UUID, ClientBossBar> bossBars ;
+    @Shadow(remap = false)
+    private Map<UUID, ClientBossBar> f_93699_;
+
     @Override
     public Map<UUID, ClientBossBar> getBossBars() {
-
-        return bossBars;
+        return f_93699_;
     }
 }

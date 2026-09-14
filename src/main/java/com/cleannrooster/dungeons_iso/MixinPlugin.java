@@ -1,10 +1,6 @@
 package com.cleannrooster.dungeons_iso;
 
-import com.bawnorton.mixinsquared.adjuster.MixinAnnotationAdjusterRegistrar;
-import com.bawnorton.mixinsquared.canceller.MixinCancellerRegistrar;
-import com.cleannrooster.dungeons_iso.mixin.CleannMixinAdjuster;
-import com.cleannrooster.dungeons_iso.mixin.CleannMixinCanceller;
-import net.fabricmc.loader.api.FabricLoader;
+import net.minecraftforge.fml.ModList;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -15,8 +11,6 @@ import java.util.Set;
 public class MixinPlugin  implements IMixinConfigPlugin {
     @Override
     public void onLoad(String mixinPackage) {
-        MixinCancellerRegistrar.register(new CleannMixinCanceller());
-        MixinAnnotationAdjusterRegistrar.register(new CleannMixinAdjuster());
     }
 
     @Override
@@ -32,7 +26,12 @@ public class MixinPlugin  implements IMixinConfigPlugin {
             for (int i = 0; i < parts.length; i++) {
                 if (parts[i].equals("compat") && i + 1 < parts.length) {
                     String modId = parts[i + 1];
-                    return FabricLoader.getInstance().isModLoaded(modId);
+                    if (modId.equals("sodium")) {
+                        modId = "embeddium";
+                    } else if (modId.equals("combat_roll")) {
+                        modId = "combatroll";
+                    }
+                    return ModList.get().isLoaded(modId);
                 }
             }
             // This means there was a failure in parsing the mod id

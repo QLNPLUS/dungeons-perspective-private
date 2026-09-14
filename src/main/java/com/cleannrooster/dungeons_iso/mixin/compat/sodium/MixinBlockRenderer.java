@@ -10,9 +10,6 @@ import com.cleannrooster.dungeons_iso.mod.Mod;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildBuffers;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.pipeline.BlockRenderContext;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.pipeline.BlockRenderer;
-import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
-import net.fabricmc.fabric.impl.client.indigo.renderer.render.AbstractBlockRenderContext;
-import net.fabricmc.loader.impl.lib.sat4j.core.Vec;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
@@ -33,6 +30,7 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -45,6 +43,7 @@ import java.util.Iterator;
 import java.util.Optional;
 
 @Mixin(BlockRenderer.class)
+@Pseudo
 public abstract class MixinBlockRenderer  {
 
 

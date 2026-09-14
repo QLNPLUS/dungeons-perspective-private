@@ -1,6 +1,5 @@
 package com.cleannrooster.dungeons_iso.util;
 
-import net.fabricmc.loader.api.FabricLoader;
 import org.apache.logging.log4j.LogManager;
 
 /**
@@ -9,8 +8,6 @@ import org.apache.logging.log4j.LogManager;
 public class Util {
 
     public static void debug(String s) {
-        if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
-            LogManager.getLogger("Minecraft XIV").info(s);
-        }
+        LogManager.getLogger("Dungeons Perspective").info(s);
     }
 }

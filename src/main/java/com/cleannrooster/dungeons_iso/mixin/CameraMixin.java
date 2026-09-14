@@ -37,18 +37,18 @@ import java.util.stream.Stream;
 public abstract class CameraMixin implements CameraAccessor {
     @Override
     public void setPosInterfae(Vec3d pos) {
-        this.pos = pos;
+        this.f_90552_ = pos;
     }
 
     @SuppressWarnings("unused")
-    @Shadow
-    private float yaw;
-    @Shadow
-    private float pitch;
+    @Shadow(remap = false)
+    private float f_90558_;
+    @Shadow(remap = false)
+    private float f_90557_;
     private Vec3d vec3d;
-    @Shadow
+    @Shadow(remap = false)
 
-    private Vec3d pos;
+    private Vec3d f_90552_;
     private Vec3d posBeforeModulation;
 
     @Override
@@ -59,9 +59,9 @@ public abstract class CameraMixin implements CameraAccessor {
     private Vec3d cachedMovement = Vec3d.ZERO;
 
     int i = 0;
-    @Shadow
+    @Shadow(remap = false)
 
-    private  BlockPos.Mutable blockPos;
+    private BlockPos.Mutable f_90553_;
 
     @Inject(
             method = "getPitch",
@@ -70,12 +70,12 @@ public abstract class CameraMixin implements CameraAccessor {
     )
     public void getPitch45(CallbackInfoReturnable<Float> ci) {
         if(Mod.enabled) {
-            ci.setReturnValue( Mod.enabled ? 45 : this.pitch);
+            ci.setReturnValue( Mod.enabled ? 45 : this.f_90557_);
         }
     }
 
-    @Shadow
-    protected abstract void setRotation(float yaw, float pitch);
+    @Shadow(remap = false)
+    protected abstract void m_90572_(float yaw, float pitch);
 
     @ModifyArgs(
             method = "update",
@@ -83,8 +83,13 @@ public abstract class CameraMixin implements CameraAccessor {
     )
     public void a(Args args) {
         if (Mod.enabled) {
+            // Advance zoom once per camera update, rather than once per clipToSpace call.
+            Mod.updateZoom();
             args.set(0,Mod.yaw);
-            args.set(1, Mod.pitch);
+            // Camera#getPitch is forced to 45 degrees, so the actual rotation must
+            // use the same fixed pitch before the camera quaternion is built.
+            Mod.pitch = 45.0F;
+            args.set(1, 45.0F);
         }
     }
 
@@ -95,16 +100,16 @@ public abstract class CameraMixin implements CameraAccessor {
     public void b(Args args) {
         if (Mod.enabled) {
             if(ClientInit.isoBinding.wasPressed()){
-                this.setRotation((float) (Math.ceil(Mod.yaw / 90) * 90 - 45),45);
+                this.m_90572_((float) (Math.ceil(Mod.yaw / 90) * 90 - 45),45);
 
-                Mod.yaw = this.yaw;
-                Mod.pitch = this.pitch;
+                Mod.yaw = this.f_90558_;
+                Mod.pitch = this.f_90557_;
             }else {
                 if(ClientInit.rotateClockwase.wasPressed()) {
-                    this.setRotation(Mod.yaw+5, Mod.pitch);
+                    this.m_90572_(Mod.yaw+5, Mod.pitch);
                 }
                 if(ClientInit.rotateCounterClockwise.wasPressed()){
-                    this.setRotation(Mod.yaw-5, Mod.pitch);
+                    this.m_90572_(Mod.yaw-5, Mod.pitch);
 
                 }
 
@@ -121,18 +126,17 @@ public abstract class CameraMixin implements CameraAccessor {
     private void clipToSpaceXIV(double a, CallbackInfoReturnable<Double> callbackInfoReturnable) {
 
         if (MinecraftClient.getInstance().gameRenderer.getCamera() != null && Mod.enabled ) {
-
             callbackInfoReturnable.setReturnValue(a);
 
-            if(MinecraftClient.getInstance().gameRenderer.getCamera().getPitch() != 45){
-                this.setRotation(this.yaw,45);
+            if(this.f_90557_ != 45.0F){
+                this.m_90572_(this.f_90558_,45);
             }
-            Mod.yaw = this.yaw;
+            Mod.yaw = this.f_90558_;
             Mod.pitch = 45;
             ClientPlayerEntity f = (MinecraftClient.getInstance().player);
 
             if (Mod.enabled ) {
-                this.posBeforeModulation = pos;
+                this.posBeforeModulation = this.f_90552_;
 
                 MinecraftClient client = MinecraftClient.getInstance();
                 assert client.player != null;
@@ -144,7 +148,7 @@ public abstract class CameraMixin implements CameraAccessor {
                    movement = client.player.getVehicle().getVelocity().subtract(0,client.player.getVehicle().getVelocity().getY(),0).multiply(5.5).multiply(2*Mod.zoom);
                 }
                 if(vec3d == null){
-                    vec3d = new Vec3d(this.pos.getX(),pos.getY(),pos.getZ());
+                    vec3d = new Vec3d(this.f_90552_.getX(),this.f_90552_.getY(),this.f_90552_.getZ());
                 }
 
                 var delta = 1F ;
@@ -154,7 +158,7 @@ public abstract class CameraMixin implements CameraAccessor {
                     delta *= tickDelta;
                     Mod.x=0F;
                     Mod.z=0F;
-                    vec3d = new Vec3d(pos.getX(),pos.y, pos.getZ());
+                    vec3d = new Vec3d(this.f_90552_.getX(),this.f_90552_.y, this.f_90552_.getZ());
                 }else
                 if(!(MinecraftClient.getInstance().options.pickItemKey.isPressed()||ClientInit.moveCameraBinding.isPressed())) {
                     delta *= (float) (((0.10)) * Config.GSON.instance().moveFactor_v3);
@@ -172,8 +176,8 @@ public abstract class CameraMixin implements CameraAccessor {
 
                 }*/
 
-                this.pos = vec3d;
-                this.blockPos.set(vec3d.getX(), vec3d.getY(), vec3d.getZ());
+                this.f_90552_ = vec3d;
+                this.f_90553_.set(vec3d.getX(), vec3d.getY(), vec3d.getZ());
 
 
 
